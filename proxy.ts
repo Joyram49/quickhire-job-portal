@@ -9,16 +9,10 @@ export function proxy(req: NextRequest) {
 
   const isAdminRoute = pathname.startsWith("/admin");
 
-  /**
-   * ✅ Protect admin routes
-   */
   if (isAdminRoute && !token) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  /**
-   * ✅ Logged-in users can't access login/signup
-   */
   if (isAuthPage && token) {
     return NextResponse.redirect(new URL("/", req.url));
   }

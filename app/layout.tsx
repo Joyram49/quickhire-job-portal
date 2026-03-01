@@ -5,6 +5,8 @@ import LocalFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 
+export const dynamic = "force-dynamic";
+
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",

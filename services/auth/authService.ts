@@ -15,6 +15,17 @@ export interface UserResponse {
   message?: string;
 }
 
+export interface MeResponse {
+  success: boolean;
+  data: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+  };
+  message?: string;
+}
+
 const AUTH_BASE_URL = `${envConfig.backendBaseUrl}/auth`;
 const ACCESS_TOKEN_KEY = "access_token";
 
@@ -30,7 +41,8 @@ export const setAccessToken = (accessToken: string) => {
   });
 };
 
-export const getAccessToken = () => {
+export const getAccessToken = (): string | undefined => {
+  if (typeof window === "undefined") return undefined;
   return getCookie(ACCESS_TOKEN_KEY) as string | undefined;
 };
 
@@ -101,19 +113,21 @@ export const logout = async (): Promise<void> => {
   }
 };
 
-export const getMe = async (): Promise<UserResponse> => {
+export const getMe = async (): Promise<MeResponse> => {
+  const token = getAccessToken();
+
   const res = await fetch(`${AUTH_BASE_URL}/me`, {
     method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     credentials: "include",
   });
 
-  if (!res.ok) {
-    throw new Error("Unauthorized");
-  }
+  const result: MeResponse = await res.json();
 
-  const result: UserResponse = await res.json();
-
-  if (!result.success) {
+  if (!res.ok || !result.success) {
     throw new Error(result.message || "Failed to fetch user");
   }
 
