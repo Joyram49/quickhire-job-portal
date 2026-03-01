@@ -1,19 +1,15 @@
+"use client";
+
 import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { MapPinIcon, SearchIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import UnderlineSvg from "@/assets/underline.svg";
-import { MapPinIcon, SearchIcon } from "lucide-react";
-import { Input } from "../ui/input";
-import Link from "next/link";
 import HeroPersonImg from "@/assets/hero-person.png";
-
-const locations = [
-  "Florence, Italy",
-  "New York, USA",
-  "London, UK",
-  "Paris, France",
-];
-
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -22,6 +18,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import FigmaShape from "../shared/FigmaShape";
+
+const locations = [
+  "Florence, Italy",
+  "New York, USA",
+  "London, UK",
+  "Paris, France",
+];
 
 const popularSearches = ["UI Designer", "UX Researcher", "Android", "Admin"];
 
@@ -108,52 +111,15 @@ export function HeroSection() {
               heights and passionate about startups.
             </p>
 
-            <div className="flex items-stretch bg-white shadow-[0px_2.71px_4.4px_#C0C0C007,0px_6.86px_11.12px_#C0C0C00A,0px_14px_22.68px_#C0C0C00C,0px_28.84px_46.72px_#C0C0C00F,0px_79px_128px_#C0C0C017] p-4  font-epilogue w-full md:max-w-[852px]">
-              <div
-                className="flex-1 flex items-center gap-3 px-3
-               "
-              >
-                <SearchIcon className="w-6 h-6 text-secondary shrink-0 mt-2" />
-                <Input
-                  id="role"
-                  placeholder="Job title or keyword"
-                  className="border-0! border-b-px! border-[#D6DDEB]! ring-0! rounded-none px-0 h-10 text-muted placeholder:text-[#7C8493] placeholder:opacity-50 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent mt-4"
-                />
-              </div>
-              <div className="flex-1 flex items-center gap-3 px-5 ">
-                <MapPinIcon className="w-6 h-6 text-secondary shrink-0 mt-2" />
-                <Select>
-                  <SelectTrigger className="w-full border-0 border-b-px! border-[#D6DDEB]! bg-transparent rounded-none py-4 mt-4">
-                    <SelectValue placeholder="Select location" />
-                  </SelectTrigger>
-                  <SelectContent align="start">
-                    {locations.map((loc, i) => (
-                      <SelectItem
-                        key={i}
-                        value={loc}
-                        className="hover:text-white"
-                      >
-                        {loc}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button
-                type="submit"
-                size="lg"
-                className="bg-primary text-white font-bold px-[27px] h-[57px]! rounded-none"
-              >
-                Search my job
-              </Button>
-            </div>
+            <HeroSearchBar />
+
             <p className="-mt-[7px] text-[#202430] font-epilogue text-base leading-[160%] flex items-center gap-x-2">
               <span className="font-normal opacity-70">Popular: </span>
               <div className="flex items-center gap-x-2">
                 {popularSearches.map((term, i) => (
                   <span key={i}>
                     <Link
-                      href={"#"}
+                      href={`/jobs?searchTerm=${encodeURIComponent(term)}`}
                       className="font-medium hover:text-primary transition-colors opacity-70"
                     >
                       {term}
@@ -167,5 +133,65 @@ export function HeroSection() {
         </div>
       </div>
     </section>
+  );
+}
+
+function HeroSearchBar() {
+  const router = useRouter();
+  const [term, setTerm] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState("");
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const params = new URLSearchParams();
+    if (term.trim()) params.set("searchTerm", term.trim());
+    if (selectedLocation) params.set("location", selectedLocation);
+
+    const query = params.toString();
+    router.push(query ? `/jobs?${query}` : "/jobs");
+  };
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="flex items-stretch bg-white shadow-[0px_2.71px_4.4px_#C0C0C007,0px_6.86px_11.12px_#C0C0C00A,0px_14px_22.68px_#C0C0C00C,0px_28.84px_46.72px_#C0C0C00F,0px_79px_128px_#C0C0C017] p-4  font-epilogue w-full md:max-w-[852px]"
+    >
+      <div className="flex-1 flex items-center gap-3 px-3">
+        <SearchIcon className="w-6 h-6 text-secondary shrink-0 mt-2" />
+        <Input
+          id="role"
+          placeholder="Job title or keyword"
+          className="border-0! border-b-px! border-[#D6DDEB]! ring-0! rounded-none px-0 h-10 text-muted placeholder:text-[#7C8493] placeholder:opacity-50 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent mt-4"
+          value={term}
+          onChange={(e) => setTerm(e.target.value)}
+        />
+      </div>
+      <div className="flex-1 flex items-center gap-3 px-5 ">
+        <MapPinIcon className="w-6 h-6 text-secondary shrink-0 mt-2" />
+        <Select
+          value={selectedLocation}
+          onValueChange={(value) => setSelectedLocation(value)}
+        >
+          <SelectTrigger className="w-full border-0 border-b-px! border-[#D6DDEB]! bg-transparent rounded-none py-4 mt-4">
+            <SelectValue placeholder="Select location" />
+          </SelectTrigger>
+          <SelectContent align="start">
+            {locations.map((loc, i) => (
+              <SelectItem key={i} value={loc} className="hover:text-white">
+                {loc}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <Button
+        type="submit"
+        size="lg"
+        className="bg-primary text-white font-bold px-[27px] h-[57px]! rounded-none"
+      >
+        Search my job
+      </Button>
+    </form>
   );
 }

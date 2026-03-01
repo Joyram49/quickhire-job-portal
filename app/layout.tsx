@@ -3,6 +3,7 @@ import { Epilogue, Inter, Red_Hat_Display } from "next/font/google";
 import LocalFont from "next/font/local";
 
 import "./globals.css";
+import { Providers } from "@/components/Providers";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -64,7 +65,8 @@ export default function RootLayout({
       className={`${clash.variable} ${inter.variable} ${epilogue.variable} ${redHat.variable} `}
     >
       <body className="bg-background text-foreground antialiased">
-        {children}
+        {/* providers contains QueryClientProvider and any future context providers */}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
